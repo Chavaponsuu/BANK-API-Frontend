@@ -5,7 +5,8 @@ import type {
   CreateAccountData, 
   UpdateAccountData, 
   CreateTransactionData,
-  ApiWithMetaResponse
+  ApiWithMetaResponse,
+  ApiResponse
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://bank-api-lngs.onrender.com/api/v1';
@@ -55,30 +56,66 @@ export async function createAccount(accountData: CreateAccountData): Promise<Acc
   }
 }
 
-export async function updateAccount(id: string, accountData: UpdateAccountData): Promise<Account> {
-  try {
-    const res = await apiClient.put<Account>(`/accounts/${id}`, accountData);
-    return res.data;
-  } catch (error) {
-    console.error(`Error updating account ${id}:`, error);
-    throw error;
-  }
-}
+// export async function updateAccount(id: string, accountData: UpdateAccountData): Promise<Account> {
+//   try {
+//     const res = await apiClient.put<Account>(`/accounts/${id}`, accountData);
+//     return res.data;
+//   } catch (error) {
+//     console.error(`Error updating account ${id}:`, error);
+//     throw error;
+//   }
+// }
 
-export async function deleteAccount(id: string): Promise<void> {
-  try {
-    await apiClient.delete(`/accounts/${id}`);
-  } catch (error) {
-    console.error(`Error deleting account ${id}:`, error);
-    throw error;
-  }
-}
+// export async function deleteAccount(id: string): Promise<void> {
+//   try {
+//     await apiClient.delete(`/accounts/${id}`);
+//   } catch (error) {
+//     console.error(`Error deleting account ${id}:`, error);
+//     throw error;
+//   }
+// }
 
 // Transaction related APIs
-export async function getTransactions(): Promise<Transaction[]> {
+export async function getTransactionsHistrory(account_number: string,page : number ,limit : number = 10): Promise<{ transactionList: Transaction[];
+  meta: ApiWithMetaResponse<Transaction[]>["meta"];}> {
   try {
-    const res = await apiClient.get<Transaction[]>('/transactions');
-    return res.data;
+    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>(`${account_number}/transactions` , {
+        params:{
+             page,
+        limit,
+
+        }
+       
+
+    });
+    return {
+        transactionList : res.data.data,
+        meta : res.data.meta
+
+    };
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
+}
+// Transaction related APIs
+export async function getAllTransactionsHistrory(page : number ,limit : number = 10): Promise<{ transactionList: Transaction[];
+  meta: ApiWithMetaResponse<Transaction[]>["meta"];}> {
+  try {
+    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>("/transactions" , {
+        params:{
+             page,
+        limit,
+
+        }
+       
+
+    });
+    return {
+        transactionList : res.data.data,
+        meta : res.data.meta
+
+    };
   } catch (error) {
     console.error('Error fetching transactions:', error);
     throw error;
@@ -87,7 +124,7 @@ export async function getTransactions(): Promise<Transaction[]> {
 
 export async function withdraw(account_number : string , amount : number , description : string): Promise<Transaction> {
   try {
-    const res = await apiClient.post("/accounts" , {
+    const res = await apiClient.post(`/accounts/${account_number}/withdraw` , {
         amount : amount , 
         description : description
     })
@@ -97,6 +134,20 @@ export async function withdraw(account_number : string , amount : number , descr
     throw error;
   }
 }
+
+export async function deposit(account_number : string , amount : number , description : string): Promise<Transaction> {
+  try {
+    const res = await apiClient.post(`/accounts/${account_number}/deposit` , {
+        amount : amount , 
+        description : description
+    })
+    return res.data;
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    throw error;
+  }
+}
+
 
 // Export the API client for custom requests
 export default apiClient;

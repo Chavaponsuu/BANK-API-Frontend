@@ -16,15 +16,17 @@ export type ApiWithMetaResponse<T> = {
     total: number;
   };
 };
-
 export interface Transaction {
-  id: string;
-  account_id: string;
-  transaction_type: 'deposit' | 'withdrawal' | 'transfer';
+  transaction_ref: string;
+  transaction_type: "DEPOSIT" | "WITHDRAWAL" ;
   amount: number;
-  description?: string;
+  balance_before: number;
+  balance_after: number;
+  description: string;
   created_at: string;
 }
+
+
 
 export interface CreateAccountData {
   account_holder: string;
