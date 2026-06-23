@@ -12,6 +12,7 @@ export function Transaction() {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
 async function handleTransaction(
   account_number: string,
@@ -39,6 +40,7 @@ async function handleTransaction(
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+  setError("");
 
   const parsedAmount = parseFloat(amount);
 
@@ -49,8 +51,15 @@ async function handleTransaction(
       description,
       transactionType
     );
-  } catch (error) {
-    console.error("Submit failed:", error);
+    // Success: reset form fields and error
+    setAccountNumber("");
+    setAmount("");
+    setDescription("");
+    setError("");
+  } catch (err: any) {
+    console.error("Submit failed:", err);
+    const message = err.response?.data?.message || err.message || "Transaction failed";
+    setError(message);
   }
 };
 
@@ -78,7 +87,10 @@ async function handleTransaction(
           <div className="relative flex gap-2">
             <button
               type="button"
-              onClick={() => setTransactionType("deposit")}
+              onClick={() => {
+                setTransactionType("deposit");
+                setError("");
+              }}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                 transactionType === "deposit"
                   ? "text-white"
@@ -95,7 +107,10 @@ async function handleTransaction(
 
             <button
               type="button"
-              onClick={() => setTransactionType("withdraw")}
+              onClick={() => {
+                setTransactionType("withdraw");
+                setError("");
+              }}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                 transactionType === "withdraw"
                   ? "text-white"
@@ -188,6 +203,13 @@ async function handleTransaction(
           </div>
         </div>
 
+        {/* Error Alert */}
+        {error && (
+          <div className="p-3 bg-red-50/80 border border-red-200/50 rounded-xl text-xs text-red-700 font-medium">
+            {error}
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">
           <button
@@ -196,6 +218,7 @@ async function handleTransaction(
               setAccountNumber("");
               setAmount("");
               setDescription("");
+              setError("");
             }}
             className="flex-1 glass-card px-6 py-3 rounded-xl border border-white/30 
                      hover:bg-white/50 transition-all font-medium text-gray-700"

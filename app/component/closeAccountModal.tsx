@@ -10,7 +10,11 @@ interface CloseAccountModalProps {
   onSuccess: () => void;
 }
 
-export function CloseAccountModal({ isOpen, onClose, onSuccess }: CloseAccountModalProps) {
+export function CloseAccountModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CloseAccountModalProps) {
   const [accountNumber, setAccountNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,8 +39,9 @@ export function CloseAccountModal({ isOpen, onClose, onSuccess }: CloseAccountMo
       onSuccess();
       onClose();
     } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || err.message || "Failed to close account");
+      const message = err.response?.data?.message || "Cannot close account";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +63,9 @@ export function CloseAccountModal({ isOpen, onClose, onSuccess }: CloseAccountMo
             <AlertTriangle className="text-red-500" size={20} />
             <div>
               <h3 className="text-lg font-bold text-gray-900">Close Account</h3>
-              <p className="text-xs text-gray-600 mt-0.5">Permanently close an existing account</p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Permanently close an existing account
+              </p>
             </div>
           </div>
           <button
@@ -73,7 +80,8 @@ export function CloseAccountModal({ isOpen, onClose, onSuccess }: CloseAccountMo
 
         {/* Warning Text */}
         <div className="mb-4 p-3 bg-amber-50/80 border border-amber-200/50 rounded-xl text-xs text-amber-700 font-medium">
-          Warning: Closing an account is permanent and cannot be undone. Make sure you have entered the correct account number.
+          Warning: Closing an account is permanent and cannot be undone. Make
+          sure you have entered the correct account number.
         </div>
 
         {/* Error Alert */}
@@ -95,8 +103,11 @@ export function CloseAccountModal({ isOpen, onClose, onSuccess }: CloseAccountMo
               placeholder="e.g. 1000000001"
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
-              className={`w-full glass-card px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-red-400/50 focus:border-red-400/50 text-sm text-gray-900 placeholder-gray-500 transition-all ${error && !accountNumber ? "border-red-400 focus:ring-red-400/50" : "border-white/30"
-                }`}
+              className={`w-full glass-card px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-red-400/50 focus:border-red-400/50 text-sm text-gray-900 placeholder-gray-500 transition-all ${
+                error && !accountNumber
+                  ? "border-red-400 focus:ring-red-400/50"
+                  : "border-white/30"
+              }`}
             />
           </div>
 
