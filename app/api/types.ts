@@ -1,9 +1,9 @@
 export interface Account {
-  	account_number: string  ;
-	owner_name :  string ;
-	account_type  : "SAVING"|"CURRENT"  ;
-	balance    :number ;
-	status       :"ACTIVE" | "CLOSED" ;
+  account_number: string;
+  owner_name: string;
+  account_type: "SAVING" | "CURRENT";
+  balance: number;
+  status: "ACTIVE" | "CLOSED";
 }
 
 export type ApiWithMetaResponse<T> = {
@@ -18,7 +18,7 @@ export type ApiWithMetaResponse<T> = {
 };
 export interface Transaction {
   transaction_ref: string;
-  transaction_type: "DEPOSIT" | "WITHDRAWAL" ;
+  transaction_type: "DEPOSIT" | "WITHDRAWAL";
   amount: number;
   balance_before: number;
   balance_after: number;
@@ -27,26 +27,19 @@ export interface Transaction {
 }
 
 
-
 export interface CreateAccountData {
-  account_holder: string;
-  account_type: string;
-  initial_balance?: number;
+  owner_name: string
+  citizen_id: string
+  phone_number: string,
+  account_type: "CURRENT" | "SAVING"
+  initial_balance: number
 }
 
-export interface UpdateAccountData {
-  account_holder?: string;
-  account_type?: string;
-  balance?: number;
+export interface CloseAccount {
+  account_number: string
 }
 
-export interface CreateTransactionData {
-  account_id: string;
-  transaction_type: 'deposit' | 'withdrawal' | 'transfer';
-  amount: number;
-  description?: string;
-  target_account_id?: string; // for transfers
-}
+
 
 export interface ApiResponse<T> {
   data: T;
@@ -54,11 +47,3 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
-export interface StatData {
-  totalBalance: number;
-  activeAccounts: number;
-  totalTransactions: number;
-  balanceChange: number;
-  accountsChange: number;
-  transactionsChange: number;
-}

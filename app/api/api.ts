@@ -1,10 +1,9 @@
 import axios from "axios";
-import type { 
-  Account, 
-  Transaction, 
-  CreateAccountData, 
-  UpdateAccountData, 
-  CreateTransactionData,
+import type {
+  Account,
+  Transaction,
+  CreateAccountData,
+
   ApiWithMetaResponse,
   ApiResponse
 } from "./types";
@@ -18,17 +17,17 @@ const apiClient = axios.create({
   },
 });
 
-export async function getAccountList(page : number , limit : number = 10): Promise<{
+export async function getAccountList(page: number, limit: number = 10): Promise<{
   accountList: Account[];
   meta: ApiWithMetaResponse<Account[]>["meta"];
 }> {
-    // console.log(API_BASE_URL);
-     const res = await apiClient.get<ApiWithMetaResponse<Account[]>>("/accounts", {
-      params: {
-        page,
-        limit,
-      },
-    });
+  // console.log(API_BASE_URL);
+  const res = await apiClient.get<ApiWithMetaResponse<Account[]>>("/accounts", {
+    params: {
+      page,
+      limit,
+    },
+  });
 
   return {
     accountList: res.data.data,
@@ -48,8 +47,8 @@ export async function getAccountById(id: string): Promise<Account> {
 
 export async function createAccount(accountData: CreateAccountData): Promise<Account> {
   try {
-    const res = await apiClient.post<Account>('/accounts', accountData);
-    return res.data;
+    const res = await apiClient.post<ApiResponse<Account>>('/accounts', accountData);
+    return res.data.data;
   } catch (error) {
     console.error('Error creating account:', error);
     throw error;
@@ -66,31 +65,34 @@ export async function createAccount(accountData: CreateAccountData): Promise<Acc
 //   }
 // }
 
-// export async function deleteAccount(id: string): Promise<void> {
-//   try {
-//     await apiClient.delete(`/accounts/${id}`);
-//   } catch (error) {
-//     console.error(`Error deleting account ${id}:`, error);
-//     throw error;
-//   }
-// }
+export async function closeAccount(accountNumber: string): Promise<void> {
+  try {
+    await apiClient.patch(`/accounts/${accountNumber}/close`);
+  } catch (error) {
+    console.error(`Error closing account ${accountNumber}:`, error);
+    throw error;
+  }
+}
 
 // Transaction related APIs
-export async function getTransactionsHistrory(account_number: string,page : number ,limit : number = 10): Promise<{ transactionList: Transaction[];
-  meta: ApiWithMetaResponse<Transaction[]>["meta"];}> {
+export async function getTransactionsHistrory(account_number: string, page: number, limit: number = 10): Promise<{
+  transactionList: Transaction[];
+  meta: ApiWithMetaResponse<Transaction[]>["meta"];
+}> {
   try {
-    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>(`${account_number}/transactions` , {
-        params:{
-             page,
+    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>(`/accounts/${account_number}/transactions`, {
+      params: {
+        page,
         limit,
 
-        }
-       
+      }
+
+
 
     });
     return {
-        transactionList : res.data.data,
-        meta : res.data.meta
+      transactionList: res.data.data,
+      meta: res.data.meta
 
     };
   } catch (error) {
@@ -99,21 +101,23 @@ export async function getTransactionsHistrory(account_number: string,page : numb
   }
 }
 // Transaction related APIs
-export async function getAllTransactionsHistrory(page : number ,limit : number = 10): Promise<{ transactionList: Transaction[];
-  meta: ApiWithMetaResponse<Transaction[]>["meta"];}> {
+export async function getAllTransactionsHistrory(page: number, limit: number = 10): Promise<{
+  transactionList: Transaction[];
+  meta: ApiWithMetaResponse<Transaction[]>["meta"];
+}> {
   try {
-    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>("/transactions" , {
-        params:{
-             page,
+    const res = await apiClient.get<ApiWithMetaResponse<Transaction[]>>("/transactions", {
+      params: {
+        page,
         limit,
 
-        }
-       
+      }
+
 
     });
     return {
-        transactionList : res.data.data,
-        meta : res.data.meta
+      transactionList: res.data.data,
+      meta: res.data.meta
 
     };
   } catch (error) {
@@ -122,11 +126,11 @@ export async function getAllTransactionsHistrory(page : number ,limit : number =
   }
 }
 
-export async function withdraw(account_number : string , amount : number , description : string): Promise<Transaction> {
+export async function withdraw(account_number: string, amount: number, description: string): Promise<Transaction> {
   try {
-    const res = await apiClient.post(`/accounts/${account_number}/withdraw` , {
-        amount : amount , 
-        description : description
+    const res = await apiClient.post(`/accounts/${account_number}/withdraw`, {
+      amount: amount,
+      description: description
     })
     return res.data;
   } catch (error) {
@@ -135,11 +139,11 @@ export async function withdraw(account_number : string , amount : number , descr
   }
 }
 
-export async function deposit(account_number : string , amount : number , description : string): Promise<Transaction> {
+export async function deposit(account_number: string, amount: number, description: string): Promise<Transaction> {
   try {
-    const res = await apiClient.post(`/accounts/${account_number}/deposit` , {
-        amount : amount , 
-        description : description
+    const res = await apiClient.post(`/accounts/${account_number}/deposit`, {
+      amount: amount,
+      description: description
     })
     return res.data;
   } catch (error) {

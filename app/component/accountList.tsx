@@ -4,36 +4,43 @@ import { getAccountList } from "../api/api";
 import { Account } from "../api/types";
 import { PaginationUi } from "./pagination";
 import { Metadata } from "next";
+import { CreateAccountModal } from "./createAccountModal";
+import { CloseAccountModal } from "./closeAccountModal";
 
 export function AccountList() {
+  const [trigger, setTrigger] = useState(0);
   const [accountList, setAccountList] = useState<Account[]>([]);
-  const [page , setPage] = useState(1)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true);
-const [total, setTotal] = useState(1);
-const [perPage, setPerPage] = useState(10);
+  const [total, setTotal] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  async function fetchData(page: number) {
+    try {
+      const res = await getAccountList(page);
+      setAccountList(res.accountList);
+
+      // console.log(res.meta)
+      setTotal(res.meta.total)
+      setPerPage(res.meta.per_page)
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await getAccountList(page);
-        setAccountList(res.accountList);
-        setPage(res.meta.page)
-        // console.log(res.meta)
-        setTotal(res.meta.total)
-        setPerPage(res.meta.per_page)
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
 
-    fetchData();
+
+    fetchData(page);
   }, [page]);
 
   const totalBalance = accountList.reduce((sum, acc) => sum + acc.balance, 0);
-   const totalPages = Math.ceil(total / perPage);
-//    console.log(totalPages)
+  const totalPages = Math.ceil(total / perPage);
+  //    console.log(totalPages)
 
   if (loading) {
     return (
@@ -47,9 +54,29 @@ const [perPage, setPerPage] = useState(10);
 
   return (
     <div className="glass-card rounded-2xl p-5 shadow-md relative overflow-hidden">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Account List</h2>
-        <p className="text-sm text-gray-600">A list of all your bank accounts</p>
+      <div className="mb-4 flex justify-between p-2">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Account List</h2>
+          <p className="text-sm text-gray-600">A list of all your bank accounts</p>
+
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-green-100/80 text-green-700 border border-green-200/50 text-sm font-medium px-4 py-2 rounded-xl hover:bg-green-200/70 transition-all shadow-sm cursor-pointer backdrop-blur-md"
+          >
+            + Create Account
+          </button>
+          <button
+            onClick={() => setIsCloseModalOpen(true)}
+            className="bg-red-100/80 text-red-700 border border-red-200/50 text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/50 transition-all shadow-sm cursor-pointer"
+          >
+            - Close Account
+          </button>
+
+        </div>
+
+
       </div>
 
       <div className="overflow-x-auto">
@@ -72,18 +99,17 @@ const [perPage, setPerPage] = useState(10);
               </tr>
             ) : (
               accountList.map((acc) => (
-                <tr 
-                  key={acc.account_number} 
+                <tr
+                  key={acc.account_number}
                   className="border-b border-white/20 hover:bg-white/30 transition-colors"
                 >
                   <td className="py-3 px-4 font-medium text-gray-900">{acc.account_number}</td>
                   <td className="py-3 px-4 text-gray-800">{acc.owner_name}</td>
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      acc.account_type === 'SAVING' 
-                        ? 'bg-blue-100/80 text-blue-700 border border-blue-200/50' 
-                        : 'bg-purple-100/80 text-purple-700 border border-purple-200/50'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acc.account_type === 'SAVING'
+                      ? 'bg-blue-100/80 text-blue-700 border border-blue-200/50'
+                      : 'bg-purple-100/80 text-purple-700 border border-purple-200/50'
+                      }`}>
                       {acc.account_type}
                     </span>
                   </td>
@@ -91,11 +117,10 @@ const [perPage, setPerPage] = useState(10);
                     ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      acc.status === 'ACTIVE' 
-                        ? 'bg-green-100/80 text-green-700 border border-green-200/50' 
-                        : 'bg-red-100/80 text-red-700 border border-red-200/50'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acc.status === 'ACTIVE'
+                      ? 'bg-green-100/80 text-green-700 border border-green-200/50'
+                      : 'bg-red-100/80 text-red-700 border border-red-200/50'
+                      }`}>
                       {acc.status}
                     </span>
                   </td>
@@ -113,12 +138,22 @@ const [perPage, setPerPage] = useState(10);
             </tr>
           </tfoot>
         </table>
-            <PaginationUi
-  page={page}
-  setPage={setPage}
-  totalPages={totalPages}
-/>
+        <PaginationUi
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+        />
       </div>
+      <CreateAccountModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => fetchData(page)}
+      />
+      <CloseAccountModal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
+        onSuccess={() => fetchData(page)}
+      />
     </div>
   );
 }
