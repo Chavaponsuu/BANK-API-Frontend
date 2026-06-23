@@ -10,7 +10,7 @@ export function AccountList() {
   const [page , setPage] = useState(1)
   const [loading, setLoading] = useState(true);
 const [total, setTotal] = useState(1);
-const [perPage, setPerPage] = useState(1);
+const [perPage, setPerPage] = useState(10);
 
   useEffect(() => {
     async function fetchData() {

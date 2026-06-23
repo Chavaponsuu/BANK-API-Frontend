@@ -2,6 +2,7 @@ import Header from "./component/header";
 import Stat from "./component/stat";
 import {Transaction  } from "./component/transaction";
 import AccountList from "./component/accountList";
+import TransactionHistory from "./component/transactionHistory";
 export default function Home() {
   return (
     <div className="min-h-screen" style={{ background: '#eef2ff' }}>
@@ -10,7 +11,12 @@ export default function Home() {
 
         <Stat/>
         <AccountList/>
-        <Transaction/>
+        <div className="flex justify-between align-middle gap-3">
+          <Transaction/>
+          <TransactionHistory/>
+
+        </div>
+        
 
 
       </div>
