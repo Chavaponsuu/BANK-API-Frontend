@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { deposit, withdraw } from "../api/api";
@@ -6,69 +6,73 @@ import { InputUi } from "./inputUi";
 
 type TransactionType = "deposit" | "withdraw";
 
-export function Transaction() {
-  const [transactionType, setTransactionType] = useState<TransactionType>("deposit");
+export function Transaction(props: { onSuccess: () => void }) {
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>("deposit");
   const [accountNumber, setAccountNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-async function handleTransaction(
-  account_number: string,
-  amount: number,
-  description: string,
-  txType: TransactionType
-) {
-  setLoading(true);
+  async function handleTransaction(
+    account_number: string,
+    amount: number,
+    description: string,
+    txType: TransactionType,
+  ) {
+    setLoading(true);
 
-  try {
-    const res =
-      txType === "deposit"
-        ? await deposit(account_number, amount, description)
-        : await withdraw(account_number, amount, description);
+    try {
+      const res =
+        txType === "deposit"
+          ? await deposit(account_number, amount, description)
+          : await withdraw(account_number, amount, description);
 
-    return res;
-  } catch (error) {
-    console.error("Transaction error:", error);
-    throw error;
-  } finally {
-    setLoading(false);
+      return res;
+    } catch (error) {
+      console.error("Transaction error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   }
-}
-
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
-
-  const parsedAmount = parseFloat(amount);
-
-  try {
-    await handleTransaction(
-      accountNumber,
-      parsedAmount,
-      description,
-      transactionType
-    );
-    // Success: reset form fields and error
-    setAccountNumber("");
-    setAmount("");
-    setDescription("");
+    e.preventDefault();
     setError("");
-  } catch (err: any) {
-    console.error("Submit failed:", err);
-    const message = err.response?.data?.message || err.message || "Transaction failed";
-    setError(message);
-  }
-};
+
+    const parsedAmount = parseFloat(amount);
+
+    try {
+      await handleTransaction(
+        accountNumber,
+        parsedAmount,
+        description,
+        transactionType,
+      );
+      // Success: reset form fields and error
+      setAccountNumber("");
+      setAmount("");
+      setDescription("");
+      setError("");
+      props.onSuccess();
+    } catch (err: any) {
+      console.error("Submit failed:", err);
+      const message =
+        err.response?.data?.message || err.message || "Transaction failed";
+      setError(message);
+    }
+  };
 
   return (
     <div className="glass-card rounded-2xl p-6 shadow-md relative overflow-hidden max-w-md mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900">New Transaction</h2>
-        <p className="text-sm text-gray-600">Manage your account transactions</p>
+        <p className="text-sm text-gray-600">
+          Manage your account transactions
+        </p>
       </div>
 
       {/* Sliding Segmented Control */}
@@ -98,8 +102,18 @@ async function handleTransaction(
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 <span>Deposit</span>
               </div>
@@ -118,8 +132,18 @@ async function handleTransaction(
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 12H4"
+                  />
                 </svg>
                 <span>Withdraw</span>
               </div>
@@ -168,11 +192,16 @@ async function handleTransaction(
             onChange={(e) => setAmount(e.target.value)}
           />
           {amount && (
-            <div className="absolute right-4 top-[42px] flex items-center gap-2">
-              <span className={`text-sm font-semibold ${
-                transactionType === "deposit" ? "text-green-600" : "text-red-600"
-              }`}>
-                {transactionType === "deposit" ? "+" : "-"} ฿{parseFloat(amount).toLocaleString()}
+            <div className="absolute right-10 top-[42px] flex items-center gap-2">
+              <span
+                className={`text-sm font-semibold ${
+                  transactionType === "deposit"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {transactionType === "deposit" ? "+" : "-"} ฿
+                {parseFloat(amount).toLocaleString()}
               </span>
             </div>
           )}
@@ -187,7 +216,9 @@ async function handleTransaction(
 
         {/* Quick Amount Buttons */}
         <div className="pt-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Quick Amount</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Quick Amount
+          </label>
           <div className="grid grid-cols-4 gap-2">
             {[100, 500, 1000, 5000].map((quickAmount) => (
               <button
@@ -230,12 +261,16 @@ async function handleTransaction(
             disabled={loading || !accountNumber || !amount}
             className={`flex-1 backdrop-blur-md px-6 py-3 rounded-xl 
                      border transition-all font-medium text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
-              transactionType === "deposit"
-                ? "bg-green-500/80 border-green-400/30 hover:bg-green-600/80"
-                : "bg-red-500/80 border-red-400/30 hover:bg-red-600/80"
-            }`}
+                       transactionType === "deposit"
+                         ? "bg-green-500/80 border-green-400/30 hover:bg-green-600/80"
+                         : "bg-red-500/80 border-red-400/30 hover:bg-red-600/80"
+                     }`}
           >
-            {loading ? "Processing..." : transactionType === "deposit" ? "Deposit Now" : "Withdraw Now"}
+            {loading
+              ? "Processing..."
+              : transactionType === "deposit"
+                ? "Deposit Now"
+                : "Withdraw Now"}
           </button>
         </div>
       </form>
@@ -243,8 +278,18 @@ async function handleTransaction(
       {/* Transaction Info */}
       <div className="mt-6 p-4 rounded-xl bg-white/20 border border-white/30">
         <div className="flex items-start gap-2">
-          <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <p className="text-xs text-gray-600">
             {transactionType === "deposit"

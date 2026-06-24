@@ -5,7 +5,7 @@ import { PaginationUi } from "./pagination";
 import { Transaction } from "../api/types";
 import { getAllTransactionsHistrory, getTransactionsHistrory } from "../api/api";
 
-export function TransactionHistory() {
+export function TransactionHistory(props:{refreshKey:number}) {
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
   const [accountNumberFilter, setAccountNumberFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -13,11 +13,10 @@ export function TransactionHistory() {
   const [loading, setLoading] = useState(false);
   const [perPage, setPerPage] = useState(10);
   const [total, setTotal] = useState(0);
+  
 
   const totalPages = Math.ceil(total / perPage);
-
-  useEffect(() => {
-    async function fetchData() {
+  async function fetchData() {
       setLoading(true);
       try {
         let res;
@@ -37,8 +36,12 @@ export function TransactionHistory() {
         setLoading(false);
       }
     }
-    fetchData();
-  }, [page, accountNumberFilter]);
+   
+
+  useEffect(() => {
+     fetchData();
+    
+  }, [page, accountNumberFilter, props.refreshKey]);
 
   function handleSearch() {
     setPage(1); // reset to page 1 on new search
@@ -74,49 +77,49 @@ export function TransactionHistory() {
         </div>
 
         {/* Filter Section */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <label className="text-xs font-medium text-gray-700 mb-1 block">
-              Filter by Account
-            </label>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Enter account ID..."
-              className="glass-card px-4 py-2 rounded-xl border border-white/30 
-                         focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50
-                         text-gray-900 text-sm transition-all"
-            />
-          </div>
+      <div className="flex items-center gap-3">
+  {/* Input */}
+  <input
+    type="text"
+    value={searchInput}
+    onChange={(e) => setSearchInput(e.target.value)}
+    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+    placeholder="Enter account number..."
+    className="glass-card px-4 py-2 rounded-xl border border-white/30 
+               focus:outline-none focus:ring-2 focus:ring-blue-400/50 
+               text-gray-900 text-sm transition-all w-64"
+  />
 
-          <button
-            onClick={handleSearch}
-            className="glass-card px-4 py-2 mt-5 rounded-xl border border-white/30 
-                       hover:bg-white/50 transition-all text-sm font-medium text-gray-700
-                       flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            Search
-          </button>
+  {/* Search Button */}
+  <button
+    onClick={handleSearch}
+    className="glass-card px-4 py-2 rounded-xl border border-white/30 
+               hover:bg-white/50 transition-all text-sm font-medium 
+               text-gray-700 flex items-center gap-2"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+        d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+    </svg>
+    Search
+  </button>
 
-          {accountNumberFilter && (
-            <button
-              onClick={handleClear}
-              className="glass-card px-4 py-2 mt-5 rounded-xl border border-white/30 
-                         hover:bg-white/50 transition-all text-sm font-medium text-gray-700
-                         flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Clear
-            </button>
-          )}
-        </div>
+  {/* Clear Button */}
+  {accountNumberFilter && (
+    <button
+      onClick={handleClear}
+      className="glass-card px-4 py-2 rounded-xl border border-white/30 
+                 hover:bg-white/50 transition-all text-sm font-medium 
+                 text-gray-700 flex items-center gap-2"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Clear
+    </button>
+  )}
+</div>
       </div>
 
       <div className="overflow-x-auto">
@@ -128,7 +131,7 @@ export function TransactionHistory() {
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
               <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-              <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Balance</th>
+              {/* <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Balance</th> */}
             </tr>
           </thead>
           <tbody>
@@ -163,9 +166,9 @@ export function TransactionHistory() {
                       {txn.transaction_type === "DEPOSIT" ? "+" : "-"} ฿{txn.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                  {/* <td className="py-3 px-4 text-right font-semibold text-gray-900">
                     ฿{txn.balance_after.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </td>
+                  </td> */}
                 </tr>
               ))
             )}

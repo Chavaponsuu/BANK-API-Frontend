@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { getAccountList } from '../api/api';
+import { getAccountList, getAllTransactionsHistrory } from '../api/api';
 
 interface StatCardProps {
   title: string;
@@ -35,15 +35,21 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-function Stat() {
+function Stat(props :{ refreshKey : number}) {
   const [totalAccounts, setTotalAccounts] = useState<number>(0);
+  const [totalTransaction , setTotalTransaction] = useState<number>(0)
+
+
 
   const [loading, setLoading] = useState(true);
   async function fetchStatData() {
     try {
+        setLoading(false)
       const res = await getAccountList(1);
+      const tx= await getAllTransactionsHistrory(1);
       // Use meta.total for total accounts count
       setTotalAccounts(res.meta.total);
+      setTotalTransaction(tx.meta.total);
     } catch (error) {
       console.error('Error fetching accounts:', error);
     } finally {
@@ -55,12 +61,12 @@ function Stat() {
 
 
     fetchStatData();
-  }, []);
+  }, [props.refreshKey]);
 
   const stats = [
     {
       title: 'Total Accounts',
-      value: loading ? '...' : totalAccounts.toLocaleString(),
+      value: loading ? '...' : totalAccounts,
       iconBgColor: 'bg-blue-100/80',
       iconColor: 'text-blue-600',
 
@@ -70,21 +76,10 @@ function Stat() {
         </svg>
       ),
     },
+   
     {
-      title: 'Active Accounts',
-      value: '1,234',
-      iconBgColor: 'bg-blue-100/80',
-      iconColor: 'text-blue-600',
-
-      icon: (
-        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
-    },
-    {
-      title: 'Transactions',
-      value: '567',
+      title: 'Total Transactions',
+      value: loading ? '...' : totalTransaction,
       iconBgColor: 'bg-purple-100/80',
       iconColor: 'text-purple-600',
 
@@ -97,8 +92,9 @@ function Stat() {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2">
       {stats.map((stat, index) => (
+        
         <StatCard key={index} {...stat} />
       ))}
     </div>
